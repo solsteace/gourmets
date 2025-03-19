@@ -1,0 +1,334 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DB_MARIADB")
+}
+
+model ContactMediums {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique(map: "name") @db.VarChar(31)
+  urlPrefix      String           @map("url_prefix") @db.VarChar(63)
+  iconPath       String           @map("icon_path") @db.VarChar(63)
+  BranchContacts BranchContacts[]
+  PlacesContacts PlacesContacts[]
+}
+
+model Countries {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(63)
+  displayName String     @map("display_name") @db.VarChar(3)
+  description String?    @db.VarChar(511)
+  Branches    Branches[]
+  Users       Users[]
+}
+
+model Levels {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique(map: "name") @db.VarChar(31)
+  requiredExp Int         @unique(map: "required_exp") @map("required_exp")
+  imagePath   String      @map("image_path") @db.VarChar(63)
+  UserStats   UserStats[]
+}
+
+model LoginAttempts {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  isOk        Boolean  @map("is_ok")
+  attemptedAt DateTime @map("attempted_at") @db.DateTime(0)
+  Users       Users    @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "LoginAttempts_ibfk_1")
+
+  @@index([userId], map: "user_id")
+}
+
+model MenuBookmark {
+  id     Int   @id @default(autoincrement())
+  menuId Int   @map("menu_id")
+  userId Int   @map("user_id")
+  Menus  Menus @relation(fields: [menuId], references: [id], onUpdate: Restrict, map: "MenuBookmark_ibfk_1")
+  Users  Users @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "MenuBookmark_ibfk_2")
+
+  @@index([menuId], map: "menu_id")
+  @@index([userId], map: "user_id")
+}
+
+model MenuImages {
+  id        Int    @id @default(autoincrement())
+  menuId    Int    @map("menu_id")
+  imagePath String @map("image_path") @db.VarChar(63)
+  caption   String @db.VarChar(63)
+  Menus     Menus  @relation(fields: [menuId], references: [id], onUpdate: Restrict, map: "MenuImages_ibfk_1")
+
+  @@index([menuId], map: "menu_id")
+}
+
+model MenuReviewImages {
+  id                     Int         @id @default(autoincrement())
+  imagePath              String?     @unique(map: "image_path") @map("image_path") @db.VarChar(63)
+  menuReviewId           Int         @map("menu_review_id")
+  BranchMenuReviews MenuReviews @relation(fields: [menuReviewId], references: [id], onUpdate: Restrict, map: "MenuReviewImages_ibfk_1")
+
+  @@index([menuReviewId], map: "menu_review_id")
+}
+
+model MenuSpecialties {
+  id          Int         @id @default(autoincrement())
+  specialtyId Int         @map("specialty_id")
+  menuId      Int         @map("menu_id")
+  Specialties Specialties @relation(fields: [specialtyId], references: [id], onUpdate: Restrict, map: "MenuSpecialties_ibfk_1")
+  Menus       Menus       @relation(fields: [menuId], references: [id], onUpdate: Restrict, map: "MenuSpecialties_ibfk_2")
+
+  @@index([menuId], map: "menu_id")
+  @@index([specialtyId], map: "specialty_id")
+}
+
+model Menus {
+  id              Int               @id @default(autoincrement())
+  placeId         Int               @map("place_id")
+  name            String            @db.VarChar(63)
+  description     String?           @db.VarChar(511)
+  BranchMenus     BranchMenus[]
+  MenuBookmark    MenuBookmark[]
+  MenuImages      MenuImages[]
+  MenuSpecialties MenuSpecialties[]
+  Places          Places            @relation(fields: [placeId], references: [id], onUpdate: Restrict, map: "Menus_ibfk_1")
+
+  @@index([placeId], map: "place_id")
+}
+
+model BranchAdmins {
+  id      Int    @id @default(autoincrement())
+  roleId  Int    @map("role_id")
+  branchId Int    @map("branch_id")
+  Roles   Roles  @relation(fields: [roleId], references: [id], onUpdate: Restrict, map: "BranchAdmins_ibfk_1")
+  Branches  Branches @relation(fields: [branchId], references: [id], onUpdate: Restrict, map: "BranchAdmins_ibfk_2")
+
+  @@index([branchId], map: "branch_id")
+  @@index([roleId], map: "role_id")
+}
+
+model PlaceSpecialties {
+  id          Int         @id @default(autoincrement())
+  placeId     Int         @map("place_id")
+  specialtyId Int         @map("specialty_id")
+  Places      Places      @relation(fields: [placeId], references: [id], onUpdate: Restrict, map: "PlaceSpecialties_ibfk_1")
+  Specialties Specialties @relation(fields: [specialtyId], references: [id], onUpdate: Restrict, map: "PlaceSpecialties_ibfk_2")
+
+  @@index([placeId], map: "place_id")
+  @@index([specialtyId], map: "specialty_id")
+}
+
+model Places {
+  id               Int                @id @default(autoincrement())
+  name             String             @db.VarChar(31)
+  description      String?            @db.VarChar(511)
+  Branches         Branches[]
+  Menus            Menus[]
+  PlaceSpecialties PlaceSpecialties[]
+  PlacesContacts   PlacesContacts[]
+}
+
+model PlacesContacts {
+  id              Int            @id @default(autoincrement())
+  placeId         Int            @map("place_id")
+  contactMediumId Int            @map("contact_medium_id")
+  contact         String         @db.VarChar(31)
+  tip             String?        @db.VarChar(15)
+  Places          Places         @relation(fields: [placeId], references: [id], onUpdate: Restrict, map: "PlacesContacts_ibfk_1")
+  ContactMediums  ContactMediums @relation(fields: [contactMediumId], references: [id], onUpdate: Restrict, map: "PlacesContacts_ibfk_2")
+
+  @@index([contactMediumId], map: "contact_medium_id")
+  @@index([placeId], map: "place_id")
+}
+
+model Reservations {
+  id              Int             @id @default(autoincrement())
+  userId          Int             @map("user_id")
+  branchId       Int             @map("branch_id")
+  status          String          @db.VarChar(7)
+  deposit         Float           @db.Float
+  startTime       DateTime        @map("start_time") @db.DateTime(0)
+  endTime         DateTime        @map("end_time") @db.DateTime(0)
+  last_updated_at DateTime        @db.DateTime(0)
+  Users           Users           @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "Reservations_ibfk_1")
+  Branches        Branches        @relation(fields: [branchId], references: [id], onUpdate: Restrict, map: "Reservations_ibfk_2")
+  ReservedSeats   ReservedSeats[]
+
+  @@index([userId], map: "user_id")
+  @@index([branchId], map: "branch_id")
+}
+
+model ReservedSeats {
+  id            Int          @id @default(autoincrement())
+  seatId        Int          @map("seat_id")
+  reservationId Int          @map("reservation_id")
+  Seats         Seats        @relation(fields: [seatId], references: [id], onUpdate: Restrict, map: "ReservedSeats_ibfk_1")
+  Reservations  Reservations @relation(fields: [reservationId], references: [id], onUpdate: Restrict, map: "ReservedSeats_ibfk_2")
+
+  @@index([reservationId], map: "reservation_id")
+  @@index([seatId], map: "seat_id")
+}
+
+model Roles {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique(map: "name") @db.VarChar(31)
+  description String?     @db.VarChar(127)
+  UserRoles   UserRoles[]
+  BranchAdmins BranchAdmins[]
+}
+
+model Seats {
+  id            Int             @id @default(autoincrement())
+  branch_id     Int
+  capacity      Int
+  name          String          @db.VarChar(31)
+  ReservedSeats ReservedSeats[]
+  Branches      Branches        @relation(fields: [branch_id], references: [id], onUpdate: Restrict, map: "Seats_ibfk_1")
+
+  @@index([branch_id], map: "branch_id")
+}
+
+model Specialties {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @db.VarChar(31)
+  imagePath            String                 @map("image_path") @db.VarChar(63)
+  MenuSpecialties      MenuSpecialties[]
+  PlaceSpecialties     PlaceSpecialties[]
+  SpecialtyPreferences SpecialtyPreferences[]
+}
+
+model SpecialtyPreferences {
+  id          Int         @id @default(autoincrement())
+  userId      Int         @map("user_id")
+  specialtyId Int         @map("specialty_id")
+  Users       Users       @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "SpecialtyPreferences_ibfk_1")
+  Specialties Specialties @relation(fields: [specialtyId], references: [id], onUpdate: Restrict, map: "SpecialtyPreferences_ibfk_2")
+
+  @@index([specialtyId], map: "specialty_id")
+  @@index([userId], map: "user_id")
+}
+
+model UserRoles {
+  id     Int   @id @default(autoincrement())
+  roleId Int   @map("role_id")
+  userId Int   @map("user_id")
+  Roles  Roles @relation(fields: [roleId], references: [id], onUpdate: Restrict, map: "UserRoles_ibfk_1")
+  Users  Users @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "UserRoles_ibfk_2")
+
+  @@index([roleId], map: "role_id")
+  @@index([userId], map: "user_id")
+}
+
+model UserStats {
+  id        Int    @id @default(autoincrement())
+  userId    Int    @map("user_id")
+  levelId   Int    @map("level_id")
+  expPoints Int    @map("exp_points")
+  Users     Users  @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "UserStats_ibfk_1")
+  Levels    Levels @relation(fields: [levelId], references: [id], onUpdate: Restrict, map: "UserStats_ibfk_2")
+
+  @@index([levelId], map: "level_id")
+  @@index([userId], map: "user_id")
+}
+
+model Users {
+  id                   Int                    @id @default(autoincrement())
+  countryId            Int?                   @map("country_id")
+  displayName          String                 @map("display_name") @db.VarChar(63)
+  username             String                 @unique(map: "username") @db.VarChar(63)
+  email                String                 @unique(map: "email") @db.VarChar(63)
+  password             String                 @unique(map: "password") @db.VarChar(63)
+  imagePath            String?                @map("image_path") @db.VarChar(63)
+  verifiedAt           DateTime?              @map("verified_at") @db.DateTime(0)
+  lastLoggedAt         DateTime?              @map("last_logged_at") @db.DateTime(0)
+  deletedAt            DateTime?              @map("deleted_at") @db.DateTime(0)
+  LoginAttempts        LoginAttempts[]
+  MenuBookmark         MenuBookmark[]
+  MenuReviews          MenuReviews[]
+  Reservations         Reservations[]
+  SpecialtyPreferences SpecialtyPreferences[]
+  UserRoles            UserRoles[]
+  UserStats            UserStats[]
+  Countries            Countries?             @relation(fields: [countryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "Users_ibfk_1")
+
+  @@index([countryId], map: "country_id")
+}
+
+model BranchContacts {
+  id                Int            @id @default(autoincrement())
+  branchId         Int              @map("branch_id")
+  contactMediumId Int             @map("contact_medium_id")
+  value             String         @db.VarChar(31)
+  displayText      String?        @db.VarChar(31) @map("display_text")
+  Branches          Branches       @relation(fields: [branchId], references: [id], onUpdate: Restrict, map: "BranchContacts_ibfk_1")
+  ContactMediums    ContactMediums @relation(fields: [contactMediumId], references: [id], onUpdate: Restrict, map: "BranchContacts_ibfk_2")
+
+  @@index([branchId], map: "branch_id")
+  @@index([contactMediumId], map: "contact_medium_id")
+}
+
+model BranchImages {
+  id         Int      @id @default(autoincrement())
+  branchId  Int      @map("branch_id")
+  imagePath String   @db.VarChar(63) @map("image_path")
+  caption    String   @db.VarChar(63)
+  Branches   Branches @relation(fields: [branchId], references: [id], onUpdate: Restrict, map: "BranchImages_ibfk_1")
+
+  @@index([branchId], map: "branch_id")
+}
+
+model BranchMenus {
+  id          Int           @id @default(autoincrement())
+  branchId   Int            @map("branch_id")
+  menuId     Int            @map("menu_id")
+  price       Float?        @db.Float
+  Branches    Branches      @relation(fields: [branchId], references: [id], onUpdate: Restrict, map: "BranchMenus_ibfk_1")
+  Menus       Menus         @relation(fields: [menuId], references: [id], onUpdate: Restrict, map: "BranchMenus_ibfk_2")
+  MenuReviews MenuReviews[]
+
+  @@index([branchId], map: "branch_id")
+  @@index([menuId], map: "menu_id")
+}
+
+model Branches {
+  id             Int              @id @default(autoincrement())
+  countryId     Int               @map("country_id")
+  placeId       Int              @map("place_id")
+  name          String          @db.VarChar(127)
+  address        String           @db.VarChar(127)
+  latitude       Int?
+  longitude      Int?
+  startOpenAt  DateTime         @db.Time(0) @map("start_open_at")
+  endOpenAt    DateTime         @db.Time(0) @map("end_open_at")
+  timeZone      String           @db.VarChar(7)  @map("time_zone")
+  closedAt      DateTime?         @db.DateTime(0) @map("closed_at")
+  BranchAdmins BranchAdmins[]
+  BranchContacts BranchContacts[]
+  BranchImages   BranchImages[]
+  BranchMenus    BranchMenus[]
+  Countries      Countries        @relation(fields: [countryId], references: [id], onUpdate: Restrict, map: "Branches_ibfk_1")
+  Places         Places           @relation(fields: [placeId], references: [id], onUpdate: Restrict, map: "Branches_ibfk_2")
+  Reservations   Reservations[]
+  Seats          Seats[]
+
+  @@index([countryId], map: "country_id")
+  @@index([placeId], map: "place_id")
+}
+
+model MenuReviews {
+  id               Int                @id @default(autoincrement())
+  branchMenuId   Int                @map("branch_menu_id")
+  userId          Int                @map("user_id")
+  comment          String             @db.VarChar(1023)
+  header           String             @db.VarChar(63)
+  rating           Int                @db.TinyInt
+  lastChangedAt    DateTime           @db.DateTime(0) @map("last_changed_at")
+  MenuReviewImages MenuReviewImages[]
+  BranchMenus      BranchMenus        @relation(fields: [branchMenuId], references: [id], onUpdate: Restrict, map: "MenuReviews_ibfk_1")
+  Users            Users              @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "MenuReviews_ibfk_2")
+
+  @@index([branchMenuId], map: "branch_menu_id")
+  @@index([userId], map: "user_id")
+}
