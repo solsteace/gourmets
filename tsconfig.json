@@ -32,6 +32,7 @@
     "paths": { /* Specify a set of entries that re-map imports to additional lookup locations. */
       "@env": ["env.ts"],
       "@sharedDomain/*": ["src/_shared/domain/*"],
+      "@UserManagement/*": ["src/UserManagement/*"],
       "@lib/*": ["src/_shared/lib/*"],
       "@middleware/*": ["src/_shared/middlewares/*"],
     },                                      
