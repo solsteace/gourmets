@@ -1,13 +1,13 @@
 import { ZodError, ZodObject, ZodSchema } from "zod";
 import { Validator } from "./index.ts";
 
-export class ZodValidator<T> implements Validator {
+export class ZodValidator<T> implements Validator<T, ZodError> {
     constructor(
         public readonly schema: ZodSchema
     ) {
     }
 
-    public validate(val: any): {data: T, error: ZodError<any> | undefined} {
+    public validate(val: any): {data: T, error?: ZodError<any>} {
         const {success, data, error} = this.schema.safeParse(val)
         return {data, error}
     }
