@@ -223,7 +223,7 @@ model UserRoles {
 
 model UserStats {
   id        Int    @id @default(autoincrement())
-  userId    Int    @map("user_id")
+  userId    Int    @map("user_id") @unique
   levelId   Int    @map("level_id")
   expPoints Int    @map("exp_points")
   Users     Users  @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "UserStats_ibfk_1")
@@ -250,7 +250,7 @@ model Users {
   Reservations         Reservations[]
   SpecialtyPreferences SpecialtyPreferences[]
   UserRoles            UserRoles[]
-  UserStats            UserStats[]
+  UserStats            UserStats?
   Countries            Countries?             @relation(fields: [countryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "Users_ibfk_1")
 
   @@index([countryId], map: "country_id")

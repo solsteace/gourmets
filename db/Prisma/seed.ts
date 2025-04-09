@@ -185,7 +185,6 @@ const main = async() => {
     console.log("Inserting `Users` data and associating their roles...")
     const insertedUsers = await Promise.all(
         userSeed.map(async(userData) => {
-            console.log(insertedRoles)
             const randCountryIdx = Math.floor(Math.random()*Object.values(insertedCountries).length)
             const randLevelIdx = Math.floor(Math.random()*Object.values(insertedLevels).length)
             const randRoleIdx = Math.floor(Math.random()*Object.values(insertedRoles).length)
