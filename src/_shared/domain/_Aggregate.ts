@@ -6,5 +6,9 @@ export abstract class AggregateRoot<T extends object> {
         public id?: number
     ){}
 
+    toJSON(): T {
+        return this.props
+    }
+
     public getId(): number | undefined {return this.id}
 }

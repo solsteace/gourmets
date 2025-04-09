@@ -11,6 +11,11 @@ export class EmailAddress extends Value<EmailAddressProps> {
     private static readonly _VALID_CRITERION = z.object({
         email: z.string().email()
     })
+
+    toJSON(): string {
+        return this.props.email
+    }
+
     private constructor(props: EmailAddressProps) {
         super(props)
     }

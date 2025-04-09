@@ -20,6 +20,10 @@ export class PlainPassword extends Value<PasswordProps> {
                     .max(PlainPassword._MAX_LEN)
     })
 
+    toJSON(): undefined {
+        return undefined
+    }
+
     private constructor(props: PasswordProps) {
         super(props)
     }
@@ -48,6 +52,10 @@ export class HashedPassword extends Value<PasswordProps> {
                     .min(HashedPassword._MIN_LEN)
                     .max(HashedPassword._MAX_LEN)
     })
+
+    toJSON(): undefined {
+        return undefined
+    }
 
     private constructor(props: PasswordProps) {
         super(props)

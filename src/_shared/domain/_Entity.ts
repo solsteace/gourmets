@@ -7,16 +7,16 @@ export abstract class Entity<T extends object> {
         protected id?: number
     ) {}
 
+    toJSON(): T {
+        return this.props
+    }
+
     public isEmpty(): boolean {
         return this.id === undefined
     }
 
     public equals(e: Entity<T>): boolean {
         return e.id === this.id
-    }
-
-    public toJSON(): string {
-        throw new AppError(AppErr.NotImplemented, "Entity<toJSON>: To be implemented")
     }
 
     public getId(): number | undefined {return this.id}

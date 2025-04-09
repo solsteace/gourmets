@@ -14,6 +14,10 @@ export class CountryDisplayName extends Value<CountryNameProps> {
         name: z.string().length(CountryDisplayName._MAX_NAME_LEN)
     })
 
+    toJSON(): string {
+        return this.props.name
+    }
+
     private constructor(props: CountryNameProps) {
         super(props)
     }

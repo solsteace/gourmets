@@ -24,6 +24,10 @@ export class TagName extends Value<NameProps> implements Name{
                         { message: TagName._INVALID_NAME_MESSAGE})
     })
 
+    toJSON(): string {
+        return this.name
+    }
+
     private constructor(props: NameProps) {
         super(props)
     }
@@ -52,6 +56,11 @@ export class DisplayName extends Value<NameProps> implements Name{
             // TODO: Put regex that allows UTF-8 letters too
             return /^[A-Za-z0-9 ]+/.test(name)
         };
+
+    toJSON(): string {
+        return this.name
+    }
+
     private static readonly _VALID_CRITERIA = z.object({
         name: z.string()
                 .refine( DisplayName._CHECK_NAME,
@@ -61,6 +70,7 @@ export class DisplayName extends Value<NameProps> implements Name{
     private constructor(props: NameProps) {
         super(props)
     }
+
 
     static create(name: string) { 
         const props = {name}
