@@ -11,7 +11,7 @@ export class CountryDisplayName extends Value<CountryNameProps> {
     // Criteria were based on 
     private static readonly _MAX_NAME_LEN = 3
     private static readonly _VALID_CRITERIA = z.object({
-        name: z.string().length(CountryDisplayName._MAX_NAME_LEN)
+        name: z.string().max(CountryDisplayName._MAX_NAME_LEN)
     })
 
     toJSON(): string {

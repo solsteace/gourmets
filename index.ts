@@ -2,6 +2,7 @@ import "tsconfig-paths/register";
 import express from "express";
 import { gEnv } from "./env.ts";
 import { ErrorHandler } from "src/_shared/middlewares/ErrorHandler.ts";
+import { routerV1 } from "@UserManagement/routes/index.ts";
 
 const APP = express()
 const timeBegin = Date.now()
@@ -15,7 +16,7 @@ if(gEnv.DEV_ON) {
 
 APP.use(express.json())
 APP.use(express.urlencoded({extended: false}))
-// APP.use( "/api/v1", routerV1)
+APP.use( "/api/v1", routerV1)
 APP.use( "/health", (_, res) => {
     res.send({ "status": "OK",
                 "uptime": `${(Date.now() - timeBegin)/1000}s` })
