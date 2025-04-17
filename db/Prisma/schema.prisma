@@ -128,6 +128,7 @@ model Places {
   Menus            Menus[]
   PlaceSpecialties PlaceSpecialties[]
   PlacesContacts   PlacesContacts[]
+  PlaceOwners   PlaceOwners[]
 }
 
 model PlacesContacts {
@@ -177,6 +178,7 @@ model Roles {
   description String?     @db.VarChar(127)
   UserRoles   UserRoles[]
   BranchAdmins BranchAdmins[]
+  PlaceOwners   PlaceOwners[]
 }
 
 model Seats {
@@ -216,9 +218,21 @@ model UserRoles {
   userId Int   @map("user_id")
   Roles  Roles @relation(fields: [roleId], references: [id], onUpdate: Restrict, map: "UserRoles_ibfk_1")
   Users  Users @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "UserRoles_ibfk_2")
-
+  
   @@index([roleId], map: "role_id")
   @@index([userId], map: "user_id")
+}
+
+model PlaceOwners {
+  id Int @id @default(autoincrement())
+  roleId Int @map("role_id")
+  placeId Int @map("place_id")
+  
+  Roles Roles @relation(fields: [roleId], references: [id], onUpdate: Restrict, map: "PlaceOwners_ibfk_1")
+  Places Places @relation(fields: [placeId], references: [id], onUpdate: Restrict, map: "PlaceOwners_ibfk_2")
+  
+  @@index([roleId], map: "role_id")
+  @@index([placeId], map: "place_id")
 }
 
 model UserStats {

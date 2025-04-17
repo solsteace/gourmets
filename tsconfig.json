@@ -33,6 +33,7 @@
       "@env": ["env.ts"],
       "@sharedDomain/*": ["src/_shared/domain/*"],
       "@UserManagement/*": ["src/UserManagement/*"],
+      "@PlaceManagement/*": ["src/PlaceManagement/*"],
       "@lib/*": ["src/_shared/lib/*"],
       "@middleware/*": ["src/_shared/middlewares/*"],
     },                                      
