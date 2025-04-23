@@ -27,7 +27,7 @@ export class PrismaPlaces implements PlaceRepo {
                 },
             },
             take: limit,
-            skip: offset
+            skip: offset ?? 0
         })
 
         return rows.map(r => {

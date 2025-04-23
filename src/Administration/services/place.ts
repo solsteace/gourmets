@@ -10,9 +10,10 @@ export class PlaceAdminService {
 
     }   
 
-    async getMany(page: number): Promise<Place[]> {
+    // Offset calculated is page-based
+    async getMany(page: number, limit: number = PlaceAdminService.pageSize): Promise<Place[]> {
         return await this._placeRepo
-            .getMany(PlaceAdminService.pageSize, page*PlaceAdminService.pageSize)
+            .getMany(PlaceAdminService.pageSize, page*limit)
     }
 
     async getOne(id: number): Promise<Place> {
