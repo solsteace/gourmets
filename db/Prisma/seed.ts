@@ -1,222 +1,230 @@
 import { Bcrypt } from "@lib/CryptoHandler/bcrypt.ts";
-import { BranchAdmins, Branches, Countries, Levels, Places, PrismaClient, Roles} from "@prisma/client";
-import { branchSeed } from "db/seedData/branches.ts";
-import { countrySeed } from "db/seedData/countries.ts";
-import { levelSeed } from "db/seedData/levels.ts";
-import { placeSeed } from "db/seedData/places.ts";
-import { roleSeed } from "db/seedData/roles.ts";
-import { userSeed } from "db/seedData/users.ts";
+import { PrismaClient} from "@prisma/client";
+import { countrySeed } from "db/seedData/Countries.ts";
+import { levelSeed } from "db/seedData/Levels.ts";
+import { roleSeed } from "db/seedData/Roles.ts";
+import { userRolesSeed } from "db/seedData/relations/UserRoles.ts";
+import { userSeed } from "db/seedData/Users.ts";
+import { userStatsSeed } from "db/seedData/UserStats.ts";
+import { specialtySeed } from "db/seedData/Specialties.ts";
+import { placeSeed } from "db/seedData/Places.ts";
+import { branchSeed } from "db/seedData/Branches.ts";
+import { placeSpecialtiesSeed } from "db/seedData/relations/PlaceSpecialties.ts";
+import { menuSeed } from "db/seedData/Menus.ts";
+import { menuSpecialtiesSeed } from "db/seedData/relations/MenuSpecialties.ts";
+import { branchMenuSeed } from "db/seedData/relations/BranchMenu.ts";
 
 const P = new PrismaClient()
-const cryptoHandler = new Bcrypt()
 
+// TIP: If the number of row is abundant (say... 1k+), consider batching the
+// seed data
 const main = async() => {
-    console.log("Clearing all data")
-    const deletionResult = await  
-        P.loginAttempts
+    const cryptoHandler = new Bcrypt()
+    const clearedTables: string[] = []
+    let clearErr = false;
+
+    await P.loginAttempts
         .deleteMany({where: {}})
-            .then(_ => { console.log("`LoginAttempts` cleared"); return P.userStats.deleteMany() })
-            .then(_ => { console.log("`UserStats` cleared"); return P.levels.deleteMany() })
-            .then(_ => { console.log("`Levels` cleared"); return P.userRoles.deleteMany() })
-            .then(_ => { console.log("`UserRoles` cleared"); return P.branchAdmins.deleteMany() })
-            .then(_ => { console.log("`BranchAdmins` cleared"); return P.roles.deleteMany() })
-            .then(_ => { console.log("`Roles` cleared"); return P.placeSpecialties.deleteMany() })
-            .then(_ => { console.log("`PlaceSpecialties` cleared"); return P.menuSpecialties.deleteMany() })
-            .then(_ => { console.log("`MenuSpecialties` cleared"); return P.menuBookmark.deleteMany() })
-            .then(_ => { console.log("`MenuBookmarks` cleared"); return P.menuReviewImages.deleteMany() })
-            .then(_ => { console.log("`MenuReviewImages` cleared"); return P.menuReviews.deleteMany() })
-            .then(_ => { console.log("`MenuReviews` cleared"); return P.contactMediums.deleteMany() })
-            .then(_ => { console.log("`ContactMedium` cleared"); return P.branchContacts.deleteMany() })
-            .then(_ => { console.log("`BranchContacts` cleared"); return P.placesContacts.deleteMany() })
-            .then(_ => { console.log("`PlaceContacts` cleared"); return P.branchImages.deleteMany() })
-            .then(_ => { console.log("`BranchImages` cleared"); return P.menuImages.deleteMany() })
-            .then(_ => { console.log("`MenuImages` cleared"); return P.specialties.deleteMany() })
-            .then(_ => { console.log("`Specialties` cleared"); return P.specialtyPreferences.deleteMany() })
-            .then(_ => { console.log("`SpecialtyPreferences` cleared"); return P.branchMenus.deleteMany() })
-            .then(_ => { console.log("`BranchMenus` cleared"); return P.menus.deleteMany() })
-            .then(_ => { console.log("`Menus` cleared"); return P.reservedSeats.deleteMany() })
-            .then(_ => { console.log("`ReservedSeats` cleared"); return P.seats.deleteMany() })
-            .then(_ => { console.log("`Seats` cleared"); return P.reservations.deleteMany() })
-            .then(_ => { console.log("`Reservations` cleared"); return P.branches.deleteMany() })
-            .then(_ => { console.log("`Branches` cleared"); return P.places.deleteMany() })
-            .then(_ => { console.log("`Places` cleared"); return P.users.deleteMany() })
-            .then(_ => { console.log("`Users` cleared"); return P.countries.deleteMany() })
+            .then(_ => { clearedTables.push("`LoginAttempts`"); return P.userStats.deleteMany() })
+            .then(_ => { clearedTables.push("`UserStats`"); return P.levels.deleteMany() })
+            .then(_ => { clearedTables.push("`Levels`"); return P.userRoles.deleteMany() })
+            .then(_ => { clearedTables.push("`UserRoles`"); return P.branchAdmins.deleteMany() })
+            .then(_ => { clearedTables.push("`BranchAdmins`"); return P.roles.deleteMany() })
+            .then(_ => { clearedTables.push("`Roles`"); return P.placeSpecialties.deleteMany() })
+            .then(_ => { clearedTables.push("`PlaceSpecialties`"); return P.menuSpecialties.deleteMany() })
+            .then(_ => { clearedTables.push("`MenuSpecialties`"); return P.menuBookmark.deleteMany() })
+            .then(_ => { clearedTables.push("`MenuBookmarks`"); return P.menuReviewImages.deleteMany() })
+            .then(_ => { clearedTables.push("`MenuReviewImages`"); return P.menuReviews.deleteMany() })
+            .then(_ => { clearedTables.push("`MenuReviews`"); return P.contactMediums.deleteMany() })
+            .then(_ => { clearedTables.push("`ContactMedium`"); return P.branchContacts.deleteMany() })
+            .then(_ => { clearedTables.push("`BranchContacts`"); return P.placesContacts.deleteMany() })
+            .then(_ => { clearedTables.push("`PlaceContacts`"); return P.branchImages.deleteMany() })
+            .then(_ => { clearedTables.push("`BranchImages`"); return P.menuImages.deleteMany() })
+            .then(_ => { clearedTables.push("`MenuImages`"); return P.specialties.deleteMany() })
+            .then(_ => { clearedTables.push("`Specialties`"); return P.specialtyPreferences.deleteMany() })
+            .then(_ => { clearedTables.push("`SpecialtyPreferences`"); return P.branchMenus.deleteMany() })
+            .then(_ => { clearedTables.push("`BranchMenus`"); return P.menus.deleteMany() })
+            .then(_ => { clearedTables.push("`Menus`"); return P.reservedSeats.deleteMany() })
+            .then(_ => { clearedTables.push("`ReservedSeats`"); return P.seats.deleteMany() })
+            .then(_ => { clearedTables.push("`Seats`"); return P.reservations.deleteMany() })
+            .then(_ => { clearedTables.push("`Reservations`"); return P.branches.deleteMany() })
+            .then(_ => { clearedTables.push("`Branches`"); return P.places.deleteMany() })
+            .then(_ => { clearedTables.push("`Places`"); return P.users.deleteMany() })
+            .then(_ => { clearedTables.push("`Users`"); return P.countries.deleteMany() })
             .catch(err => {
                 console.log("Error happened during clearing data")
                 console.log(err)
-                process.exit(-1)
+                clearErr = true
             })
-    console.log("`Users` cleared")
-    console.log("Data clearance done")
+            .finally(() => {
+                console.log(` ${clearedTables.join(", ")} cleared`)
+                console.log("Data clearance done")
+                if(clearErr)
+                    process.exit(-1)
+            })
 
+    await (async() => {
+        await P.countries.createMany({ data: countrySeed })
+        console.log("`Countries` inserted")
+    })()
 
-
-    console.log("Inserting `Levels` data...")
-    const insertedLevels = await Promise.all(
-        levelSeed.map(async(l): Promise<Levels | null> => {
-            return await 
-                P.levels
-                    .findFirst({where: {name: l.name}})
-                    .then(foundL => foundL === null
-                                        ? P.levels.create({data: l})
-                                        : foundL)
-        })
-    )
-    console.log(insertedLevels.every(v => v !== null)
-                    ? "`Levels` data has successfully inserted"
-                    : "Nothing inserted to `Levels`")
-
-
-    console.log("Inserting `Countries` data...")
-    const insertedCountries = await Promise.all(
-        countrySeed.map(async(c): Promise<Countries | null> => {
-            return await 
-                P.countries
-                    .findFirst({ where: {name: c.name} })
-                    .then(foundC => foundC === null 
-                                        ? P.countries.create({data: c})
-                                        : foundC)
-        })
-    )
-    const insertedCountriesList = Object.fromEntries(
-        insertedCountries.filter(v => v !== null)
-                        .map(v => [v.displayName, v.id])
-    )
-    console.log(insertedCountries.every(v => v !== null)
-                    ? "`Countries` data has successfully inserted"
-                    : "Nothing inserted to `Countries`")
-
-
-    console.log("Inserting `Roles` data...")
-    const insertedRoles = await Promise.all(
-        roleSeed.map(async(r): Promise<Roles | null> => {
-            return await 
-                P.roles
-                    .findFirst({where: {name: r.name}})
-                    .then(foundR => foundR === null
-                                    ? P.roles.create({data: r})
-                                    : foundR)
+    await (async() => {
+        const specialtyTemp = specialtySeed.map(s => ({
+            id: s.id, 
+            imagePath: s.imagePath, 
+            name: s.name
         }))
-    console.log(insertedRoles.every(v => v !== null)
-                    ? "`Roles` data has successfully inserted"
-                    : "Nothing inserted to `Roles`")
+        await P.specialties.createMany({ data: specialtyTemp })
+        console.log("`Specialties` inserted")
+    })()
+    
+    await (async() => {
+        await P.levels.createMany( { data: levelSeed })
+        console.log("`levels` inserted")
+    })()
 
+    await (async() => {
+        await P.roles.createMany({ data: roleSeed })
+        console.log("`roles` inserted")
+    })()
 
-    console.log("Inserting `Places` data along with their `Branches`...")
-    const insertedPlaces = await Promise.all(
-        placeSeed.map(async(p): Promise<Places | null> => {
-            const {country: _, ...pData} = p
-            const branchData = {
-                data: branchSeed
-                    .filter(b => b.country === p.country)
-                    .map(b => {
-                        const {country, ...bData} = b
-                        const branchCountryId = insertedCountriesList[country]
-                        return {...bData, 
-                            countryId: branchCountryId,
-                        }
-                    })
+    await (async() => {
+        const userData = await Promise.all(
+            userSeed.map(async(u) => {
+            const {_foreignId, ...user} = u
+            user.password = await cryptoHandler.generate(user.password)
+            return {
+                ...user,
+                countryId: _foreignId.country
             }
-
-            const place = await 
-                P.places
-                    .findFirst({where: {name: p.name}})
-                    .then(foundP => {
-                        return foundP === null
-                            ? P.places.create({ 
-                                data: {
-                                    ...pData,
-                                    Branches: {
-                                        createMany: branchData
-                                    }
-                                }
-                            })
-                            : foundP
-                    })
-
-            const placeBranches = await P.branches.findMany({ where: {placeId: place.id} })
-            const branchAdmins = await Promise.all(
-                placeBranches.map(async(pb): Promise<Roles> => {
-                    const branchAdmin = `${place.id}B${pb.id}`
-                    return P.roles
-                        .findFirst({where: {name: branchAdmin}})
-                        .then(foundR => {
-                            if(foundR !== null)
-                                return foundR
-                            return P.roles.create ({
-                                data: {
-                                    name:  branchAdmin,
-                                    description: `Manages ${pb.name}`,
-                                    BranchAdmins: {
-                                        create: { branchId: pb.id, }
-                                    }
-                                }
-                            })
-                        })
-                })
-            )
-            insertedRoles.push(...branchAdmins)
-
-            const placeAdminName = `${place.id}B`
-            const placeAdmin = await 
-                P.roles
-                    .findFirst({where: {name: placeAdminName} })
-                    .then(foundR => {
-                        if(foundR !== null)
-                            return foundR
-                        return P.roles.create({
-                            data: {
-                                name: placeAdminName,
-                                description: `Manages all of ${place.name} branches`,
-                                BranchAdmins: {
-                                    createMany: {
-                                        data: placeBranches.map(pb => {
-                                            return {branchId: pb.id}})
-                                    }
-                                }
-                            }
-                        })
-                    })
-            insertedRoles.push(placeAdmin)
-            return place
         }))
 
+        await P.users.createMany({ data: userData })
+        console.log("`User` inserted")
+    })()
 
-    console.log("Inserting `Users` data and associating their roles...")
-    const insertedUsers = await Promise.all(
-        userSeed.map(async(userData) => {
-            const randCountryIdx = Math.floor(Math.random()*Object.values(insertedCountries).length)
-            const randLevelIdx = Math.floor(Math.random()*Object.values(insertedLevels).length)
-            const randRoleIdx = Math.floor(Math.random()*Object.values(insertedRoles).length)
+    await (async() => {
+        await P.places.createMany({
+            data: placeSeed.map(p => {
+                const {_foreignId, ...place} = p
+                return place
+            })
+        })
+        console.log("`Places` inserted")
+    })()
 
-            const randCountry = insertedCountries[randCountryIdx]!
-            const randLevel = insertedLevels[randLevelIdx]!
-            const randRole = insertedRoles[randRoleIdx]!
-
-            userData.password = await cryptoHandler.generate(userData.password)
-            return await P.users.upsert({
-                where: {username: userData.username},
-                update: {},
-                create: {
-                    ...userData,
-                    countryId: randCountry.id,
-                    UserStats: {
-                        create: { 
-                            levelId: randLevel.id,
-                            expPoints: randLevel.requiredExp - 3
-                        }
-                    },
-                    UserRoles: {
-                        create: {
-                            roleId: randRole.id
-                        }
-                    }
+    await (async() => {
+        await P.branches.createMany({
+            data: branchSeed.map(b => {
+                const {_foreignId, ...branch} = b
+                return {
+                    ...branch,
+                    countryId: _foreignId.country,
+                    placeId: _foreignId.place
                 }
             })
-        }))
-    console.log(insertedUsers.every(v => v !== null)
-                    ? "`Users` data has successfully inserted"
-                    : "Nothing has inserted to `Users`")
+        })
+        console.log("`Branches` inserted")
+    })()
+
+    await (async() => {
+        await P.menus.createMany({
+            data: menuSeed.map(m => {
+                const {_foreignId, ...menu} = m
+                return {
+                    ...menu, 
+                    placeId: _foreignId.place
+                }
+            })
+        })
+        console.log("`Menus` inserted")
+    })()
+
+    // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    // %%%%%%%%%%%%%%%% Relations %%%%%%%%%%%%%%%%%%%%%%%%
+    // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    await Promise.all(
+        userStatsSeed.map(async(us) => {
+            const {_foreignId, ...userStats} = us
+            await P.userStats.create({
+                data: {
+                    ...userStats,
+                    userId: _foreignId.user,
+                    levelId: _foreignId.level
+                }
+            })
+        })
+    )
+    console.log("`UserStats` assigned")
+
+    await (async() => {
+        const userRoleAcc: {roleId: number, userId: number}[] = []
+        userRolesSeed.map(ur => {
+            ur.roles.map(r => {
+                const {id} = r
+                userRoleAcc.push({ userId: ur.user, roleId: id })
+            })
+        })
+
+        await P.userRoles.createMany({ data: userRoleAcc })
+        console.log("Associated `Roles` with `Users`")
+    })()
+
+    await (async() => {
+        const placeSpecialtyAcc: {
+            placeId: number,
+            specialtyId: number}[] = []
+        placeSpecialtiesSeed.forEach(ps => {
+            ps.specialties.forEach(s => {
+                const {id} = s
+                placeSpecialtyAcc.push({
+                    placeId: ps.place,
+                    specialtyId: id
+                })
+            })
+        })
+
+        await P.placeSpecialties.createMany({data: placeSpecialtyAcc})
+        console.log("Associated `Specialties` with `Places`")
+    })()
+
+    await (async() => {
+        const menuSpecialtyAcc: {
+            menuId: number,
+            specialtyId: number }[] = []
+        menuSpecialtiesSeed.forEach(ms => {
+            ms.specialties.forEach(s => {
+                const {id} = s
+                menuSpecialtyAcc.push({
+                    menuId: ms.menu,
+                    specialtyId: id
+                })
+            })
+        })
+
+        await P.menuSpecialties.createMany({data: menuSpecialtyAcc})
+        console.log("Associated `Specialties` with `Menus`")
+    })()
+
+    await (async() => {
+        const branchMenuAcc: {
+            branchId: number,
+            menuId: number,
+            price: number, }[] = []
+        branchMenuSeed.forEach(bm => {
+            bm.menu.forEach(m => {
+                branchMenuAcc.push({
+                    branchId: bm.branch,
+                    menuId: m.id,
+                    price: m.priceUSD
+                })
+            })
+        })
+
+        await P.branchMenus.createMany({data: branchMenuAcc})
+        console.log("Associated `Menus` with `Branches`")
+    })()
+
 }
 
 main()

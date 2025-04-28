@@ -194,7 +194,7 @@ model Seats {
 
 model Specialties {
   id                   Int                    @id @default(autoincrement())
-  name                 String                 @db.VarChar(31)
+  name                 String                 @db.VarChar(31) @unique
   imagePath            String                 @map("image_path") @db.VarChar(63)
   MenuSpecialties      MenuSpecialties[]
   PlaceSpecialties     PlaceSpecialties[]
@@ -312,8 +312,8 @@ model Branches {
   placeId       Int              @map("place_id")
   name          String          @db.VarChar(127)
   address        String           @db.VarChar(127)
-  latitude       Int?
-  longitude      Int?
+  latitude       Int
+  longitude      Int
   startOpenAt  DateTime         @db.Time(0) @map("start_open_at")
   endOpenAt    DateTime         @db.Time(0) @map("end_open_at")
   timeZone      String           @db.VarChar(7)  @map("time_zone")
